@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
 
 namespace CrashIt
 {
@@ -20,20 +14,26 @@ namespace CrashIt
         // https://learn.microsoft.com/en-us/archive/blogs/jmstall/using-createremotethread-from-c
         [DllImport("kernel32")]
         public static extern IntPtr CreateRemoteThread(
-  IntPtr hProcess,
-  IntPtr lpThreadAttributes,
-  uint dwStackSize,
-  IntPtr lpStartAddress, // raw Pointer into remote process
-  IntPtr lpParameter,
-  uint dwCreationFlags,
-  out uint lpThreadId
-);
+              IntPtr hProcess,
+              IntPtr lpThreadAttributes,
+              uint dwStackSize,
+              IntPtr lpStartAddress, // raw Pointer into remote process
+              IntPtr lpParameter,
+              uint dwCreationFlags,
+              out uint lpThreadId
+            );
 
-        public static int MyThreadProc(IntPtr param)
+
+        public static int GetPidFromPoint(Point pos)
         {
-            int pid = Process.GetCurrentProcess().Id;
-            Console.WriteLine("Pid {0}: Inside my new thread!. Param={1}", pid, param.ToInt32());
-            return 1;
+            int processId = 0;
+            IntPtr hWnd = NativeMethods.WindowFromPoint(pos);
+            if (hWnd != IntPtr.Zero)
+            {
+                NativeMethods.GetWindowThreadProcessId(hWnd, out uint uProcessId);
+                processId = (int)uProcessId;
+            }
+            return processId;
         }
     }
 }

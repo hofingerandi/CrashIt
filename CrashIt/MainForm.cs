@@ -78,81 +78,18 @@ namespace CrashIt
                 return;
 
             var pos = Cursor.Position;
-            IntPtr hWnd = NativeMethods.WindowFromPoint(pos);
-            if (hWnd != IntPtr.Zero)
-            {
-                NativeMethods.GetWindowThreadProcessId(hWnd, out var processId);
-                // Don't allow selecting our own process.
-                if (processId == Process.GetCurrentProcess().Id)
-                    return;
+            var processId = NativeMethods.GetPidFromPoint(pos);
 
-                Process = Process.GetProcessById((int)processId);
-            }
+            if (processId == Environment.ProcessId)
+                return;
+
+            Process = Process.GetProcessById((int)processId);
         }
         #endregion
 
         private void btnCrash_Click(object sender, EventArgs e)
         {
-            if (_process == null)
-                return;
-
-            IntPtr hProcess = IntPtr.Zero;
-            try
-            {
-                hProcess = _process?.Handle ?? IntPtr.Zero;
-            }
-            catch
-            {
-                MessageBox.Show(
-                    $"Failed to get handle for process {_process?.ProcessName} (PID: {_process?.Id}).\r\n" +
-                    "Make sure you have sufficient permissions.",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-
-            if (hProcess == IntPtr.Zero)
-                return;
-
-            var choice = MessageBox.Show(
-                $"Trying to crash process {_process?.ProcessName} (PID: {_process?.Id})!\r\nProceed?",
-                "Crashing Process",
-                MessageBoxButtons.OKCancel,
-                MessageBoxIcon.Warning);
-
-            if (choice != DialogResult.OK)
-                return;
-
-            // We just use some dummy address, that definitely won't work.
-            IntPtr fpProc = new IntPtr(1234);
-
-            uint dwThreadId;
-            // Create a thread in the other process, and execute our function there.
-            IntPtr hThread = NativeMethods.CreateRemoteThread(
-                hProcess,
-                IntPtr.Zero /* threadAttributes */,
-                0 /* stackSize */,
-                fpProc /* startAddress */,
-                IntPtr.Zero /* parameters */,
-                0 /* creationFlags */,
-                out dwThreadId);
-
-            string caption;
-            string msg;
-            MessageBoxIcon icon;
-            if (dwThreadId != 0)
-            {
-                caption = "Success";
-                msg = $"\r\nSuccessfully created remote thread in process {_process?.ProcessName} (PID: {_process?.Id})";
-                icon = MessageBoxIcon.Information;
-            }
-            else
-            {
-                caption = "Failure";
-                msg = $"\r\nFailed to create remote thread in process {_process?.ProcessName} (PID: {_process?.Id})";
-                icon = MessageBoxIcon.Error;
-            }
-            MessageBox.Show(msg, caption, MessageBoxButtons.OK, icon);
+            ProcessCrasher.CrashProcess(_process);
         }
     }
 }
