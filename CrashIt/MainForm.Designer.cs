@@ -30,6 +30,7 @@
         {
             btnSelectWindow = new Button();
             txtInfo = new TextBox();
+            btnCrash = new Button();
             SuspendLayout();
             // 
             // btnSelectWindow
@@ -53,11 +54,23 @@
             txtInfo.Size = new Size(100, 73);
             txtInfo.TabIndex = 1;
             // 
+            // btnCrash
+            // 
+            btnCrash.Font = new Font("Segoe UI", 20F);
+            btnCrash.Location = new Point(123, 12);
+            btnCrash.Name = "btnCrash";
+            btnCrash.Size = new Size(75, 66);
+            btnCrash.TabIndex = 2;
+            btnCrash.Text = "⌖";
+            btnCrash.UseVisualStyleBackColor = true;
+            btnCrash.Click += btnCrash_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(btnCrash);
             Controls.Add(txtInfo);
             Controls.Add(btnSelectWindow);
             Name = "MainForm";
@@ -70,5 +83,6 @@
 
         private Button btnSelectWindow;
         private TextBox txtInfo;
+        private Button btnCrash;
     }
 }
