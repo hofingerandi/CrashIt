@@ -32,6 +32,25 @@ namespace CrashIt
             }
         }
 
+        #region Red Button
+        private void btnCrash_EnabledChanged(object sender, EventArgs e)
+        {
+            btnCrash.ForeColor = btnCrash.Enabled ? System.Drawing.Color.White : System.Drawing.Color.Gray;
+            btnCrash.BackColor = System.Drawing.Color.DarkRed;
+        }
+
+        private void btnCrash_Paint(object sender, PaintEventArgs e)
+        {
+            // https://stackoverflow.com/a/23416851/821134
+
+            Button btn = (Button)sender;
+            btn.Text = string.Empty;
+            TextFormatFlags flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;   // center the text
+            TextRenderer.DrawText(e.Graphics, "Crash It", btn.Font, e.ClipRectangle, btn.ForeColor, flags);
+        }
+        #endregion
+
+        #region Select Window
         private void btnSelectWindow_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -70,13 +89,28 @@ namespace CrashIt
                 Process = Process.GetProcessById((int)processId);
             }
         }
+        #endregion
 
         private void btnCrash_Click(object sender, EventArgs e)
         {
             if (_process == null)
                 return;
 
-            IntPtr hProcess = _process?.Handle ?? IntPtr.Zero;
+            IntPtr hProcess = IntPtr.Zero;
+            try
+            {
+                hProcess = _process?.Handle ?? IntPtr.Zero;
+            }
+            catch
+            {
+                MessageBox.Show(
+                    $"Failed to get handle for process {_process?.ProcessName} (PID: {_process?.Id}).\r\n" +
+                    "Make sure you have sufficient permissions.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+
             if (hProcess == IntPtr.Zero)
                 return;
 
@@ -103,16 +137,22 @@ namespace CrashIt
                 0 /* creationFlags */,
                 out dwThreadId);
 
+            string caption;
             string msg;
+            MessageBoxIcon icon;
             if (dwThreadId != 0)
             {
+                caption = "Success";
                 msg = $"\r\nSuccessfully created remote thread in process {_process?.ProcessName} (PID: {_process?.Id})";
+                icon = MessageBoxIcon.Information;
             }
             else
             {
+                caption = "Failure";
                 msg = $"\r\nFailed to create remote thread in process {_process?.ProcessName} (PID: {_process?.Id})";
+                icon = MessageBoxIcon.Error;
             }
-            MessageBox.Show(msg);
+            MessageBox.Show(msg, caption, MessageBoxButtons.OK, icon);
         }
     }
 }

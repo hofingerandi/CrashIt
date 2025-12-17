@@ -31,6 +31,7 @@
             btnSelectWindow = new Button();
             txtInfo = new TextBox();
             btnCrash = new Button();
+            lblInfo = new Label();
             SuspendLayout();
             // 
             // btnSelectWindow
@@ -48,31 +49,46 @@
             // 
             // txtInfo
             // 
-            txtInfo.Location = new Point(12, 100);
+            txtInfo.Location = new Point(12, 84);
             txtInfo.Multiline = true;
             txtInfo.Name = "txtInfo";
-            txtInfo.Size = new Size(100, 73);
+            txtInfo.Size = new Size(287, 131);
             txtInfo.TabIndex = 1;
             // 
             // btnCrash
             // 
-            btnCrash.Font = new Font("Segoe UI", 20F);
-            btnCrash.Location = new Point(123, 12);
+            btnCrash.BackColor = Color.DarkRed;
+            btnCrash.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnCrash.ForeColor = Color.White;
+            btnCrash.Location = new Point(12, 218);
             btnCrash.Name = "btnCrash";
-            btnCrash.Size = new Size(75, 66);
+            btnCrash.Size = new Size(287, 40);
             btnCrash.TabIndex = 2;
-            btnCrash.Text = "⌖";
-            btnCrash.UseVisualStyleBackColor = true;
+            btnCrash.Text = "Crash It!";
+            btnCrash.UseVisualStyleBackColor = false;
+            btnCrash.EnabledChanged += btnCrash_EnabledChanged;
             btnCrash.Click += btnCrash_Click;
+            btnCrash.Paint += btnCrash_Paint;
+            // 
+            // lblInfo
+            // 
+            lblInfo.Location = new Point(93, 12);
+            lblInfo.Name = "lblInfo";
+            lblInfo.Size = new Size(206, 66);
+            lblInfo.TabIndex = 3;
+            lblInfo.Text = "Drag the cursor and select a window.\r\nThe application will try to crash the corresponding process.";
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(310, 267);
+            Controls.Add(lblInfo);
             Controls.Add(btnCrash);
             Controls.Add(txtInfo);
             Controls.Add(btnSelectWindow);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
             Name = "MainForm";
             Text = "Crash It!";
             ResumeLayout(false);
@@ -84,5 +100,6 @@
         private Button btnSelectWindow;
         private TextBox txtInfo;
         private Button btnCrash;
+        private Label lblInfo;
     }
 }
