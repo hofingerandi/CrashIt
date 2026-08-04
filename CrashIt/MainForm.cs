@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 
 namespace CrashIt
@@ -89,7 +90,56 @@ namespace CrashIt
 
         private void btnCrash_Click(object sender, EventArgs e)
         {
-            ProcessCrasher.CrashProcess(_process);
+            if (_process == null)
+                return;
+
+            IntPtr hProcess = IntPtr.Zero;
+            try
+            {
+                hProcess = _process?.Handle ?? IntPtr.Zero;
+            }
+            catch
+            {
+                MessageBox.Show(
+                    $"Failed to get handle for process {_process?.ProcessName} (PID: {_process?.Id}).\r\n" +
+                    "Make sure you have sufficient permissions.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+
+            if (hProcess == IntPtr.Zero)
+                return;
+
+            var choice = MessageBox.Show(
+                $"Trying to crash process {_process?.ProcessName} (PID: {_process?.Id})!\r\nProceed?",
+                "Crashing Process",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Warning);
+
+            if (choice != DialogResult.OK)
+                return;
+
+            // We just use some dummy address, that definitely won't work.
+            IntPtr fpProc = new(1234);
+            bool threadCreated = ProcessCrasher.CrashProcess(_process?.Handle ?? IntPtr.Zero, fpProc);
+
+            string caption;
+            string msg;
+            MessageBoxIcon icon;
+            if (threadCreated)
+            {
+                caption = "Success";
+                msg = $"\r\nSuccessfully created remote thread in process {_process?.ProcessName} (PID: {_process?.Id})";
+                icon = MessageBoxIcon.Information;
+            }
+            else
+            {
+                caption = "Failure";
+                msg = $"\r\nFailed to create remote thread in process {_process?.ProcessName} (PID: {_process?.Id})";
+                icon = MessageBoxIcon.Error;
+            }
+            MessageBox.Show(msg, caption, MessageBoxButtons.OK, icon);
         }
     }
 }
