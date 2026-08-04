@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 
 namespace CrashIt
@@ -111,18 +110,25 @@ namespace CrashIt
             if (hProcess == IntPtr.Zero)
                 return;
 
+            List<ProcessModule> modules = ProcessCrasher.GetCandidateModules(_process!);
+            using var dlg = new DllListing();
+            dlg.SetModules(modules);
+            var dlgResult = dlg.ShowDialog();
+            if (dlgResult == DialogResult.Cancel)
+                return;
+
+            var module = dlg.SelectedModule;
+
             var choice = MessageBox.Show(
-                $"Trying to crash process {_process?.ProcessName} (PID: {_process?.Id})!\r\nProceed?",
-                "Crashing Process",
-                MessageBoxButtons.OKCancel,
-                MessageBoxIcon.Warning);
+    $"Trying to crash process {_process?.ProcessName} (PID: {_process?.Id})!\r\nProceed?",
+    "Crashing Process",
+    MessageBoxButtons.OKCancel,
+    MessageBoxIcon.Warning);
 
             if (choice != DialogResult.OK)
                 return;
 
-            // We just use some dummy address, that definitely won't work.
-            IntPtr fpProc = new(1234);
-            bool threadCreated = ProcessCrasher.CrashProcess(_process?.Handle ?? IntPtr.Zero, fpProc);
+            bool threadCreated = ProcessCrasher.CrashProcess(_process?.Handle ?? IntPtr.Zero, module);
 
             string caption;
             string msg;
